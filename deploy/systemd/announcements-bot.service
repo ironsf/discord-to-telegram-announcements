@@ -1,0 +1,19 @@
+[Unit]
+Description=StakeCraft Announcements Relay Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=annbot
+Group=annbot
+WorkingDirectory=/opt/announcements-bot
+Environment=CONFIG_PATH=/opt/announcements-bot/config/config.json
+Environment=ENV_FILE=/opt/announcements-bot/.env
+ExecStart=/opt/announcements-bot/bin/announcements-bot
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
