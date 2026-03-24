@@ -34,10 +34,12 @@ type rawConfig struct {
 }
 
 type rawChannel struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Enabled  *bool    `json:"enabled"`
-	Keywords []string `json:"keywords"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Enabled   *bool    `json:"enabled"`
+	Keywords  []string `json:"keywords"`
+	Theme     string   `json:"theme"`
+	TitleBold *bool    `json:"titleBold"`
 }
 
 func LoadDotEnv(path string) {
@@ -98,11 +100,17 @@ func Load(configPath string) (*model.AppConfig, error) {
 		if ch.Enabled != nil {
 			enabled = *ch.Enabled
 		}
+		titleBold := false
+		if ch.TitleBold != nil {
+			titleBold = *ch.TitleBold
+		}
 		cfg.Discord.AllowedChannels = append(cfg.Discord.AllowedChannels, model.ChannelConfig{
-			ID:       ch.ID,
-			Name:     ch.Name,
-			Enabled:  enabled,
-			Keywords: ch.Keywords,
+			ID:        ch.ID,
+			Name:      ch.Name,
+			Enabled:   enabled,
+			Keywords:  ch.Keywords,
+			Theme:     strings.TrimSpace(ch.Theme),
+			TitleBold: titleBold,
 		})
 	}
 	cfg.Telegram.MainChatID = raw.Telegram.MainChatID

@@ -24,10 +24,12 @@ type AnnouncementEvent struct {
 }
 
 type ChannelConfig struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Enabled  bool     `json:"enabled"`
-	Keywords []string `json:"keywords"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Enabled   bool     `json:"enabled"`
+	Keywords  []string `json:"keywords"`
+	Theme     string   `json:"theme"`
+	TitleBold bool     `json:"titleBold"`
 }
 
 type AppConfig struct {
@@ -54,6 +56,8 @@ type AppConfig struct {
 
 type ForwardRequest struct {
 	SourcePrefix   string
+	Theme          string
+	TitleBold      bool
 	Text           string
 	Permalink      string
 	AttachmentURLs []string
@@ -63,6 +67,8 @@ type ForwardRequest struct {
 
 type EditNoticeRequest struct {
 	SourcePrefix string
+	Theme        string
+	TitleBold    bool
 	ChannelName  string
 	Permalink    string
 	Text         string

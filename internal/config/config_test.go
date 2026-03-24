@@ -82,6 +82,49 @@ func TestConfigAcceptsKnownMessageFormats(t *testing.T) {
 	}
 }
 
+func TestConfigLoadsChannelThemeAndTitleBold(t *testing.T) {
+	t.Setenv("DISCORD_BOT_TOKEN", "discord-token")
+	t.Setenv("TELEGRAM_BOT_TOKEN", "telegram-token")
+
+	configPath := writeConfigFixture(t, `{
+  "discord": {
+    "guildId": "guild",
+    "allowedChannels": [
+      {
+        "id": "1",
+        "name": "solana-tds",
+        "enabled": true,
+        "keywords": ["release"],
+        "theme": "green",
+        "titleBold": true
+      }
+    ]
+  },
+  "telegram": {
+    "mainChatId": "main",
+    "opsChatId": "ops",
+    "messageFormat": "card"
+  },
+  "runtime": {},
+  "storage": {
+    "sqlitePath": "data/app.sqlite",
+    "maxForwardedAnnouncements": 5
+  }
+}`)
+
+	cfg, err := Load(configPath)
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	ch := cfg.Discord.AllowedChannels[0]
+	if ch.Theme != "green" {
+		t.Fatalf("expected theme green, got %q", ch.Theme)
+	}
+	if !ch.TitleBold {
+		t.Fatal("expected titleBold=true")
+	}
+}
+
 func TestConfigRejectsUnknownMessageFormat(t *testing.T) {
 	t.Setenv("DISCORD_BOT_TOKEN", "discord-token")
 	t.Setenv("TELEGRAM_BOT_TOKEN", "telegram-token")

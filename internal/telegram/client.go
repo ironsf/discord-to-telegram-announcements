@@ -123,7 +123,7 @@ func FormatForwardMessage(req model.ForwardRequest, messageFormat string) string
 }
 
 func FormatEditNotice(req model.EditNoticeRequest) string {
-	title := "<b>Updated</b> " + html.EscapeString(req.SourcePrefix)
+	title := "<b>Updated</b> " + formatChannelTitle(req.SourcePrefix, req.Theme, req.TitleBold)
 	if reason := detectEditReason(req.Text); reason != "" {
 		title = title + " <i>(" + html.EscapeString(reason) + ")</i>"
 	}
@@ -149,7 +149,7 @@ func FormatEditNotice(req model.EditNoticeRequest) string {
 func formatForwardCard(req model.ForwardRequest) string {
 	category := detectAnnouncementCategory(req.Text)
 	lines := []string{
-		"<b>New</b> " + html.EscapeString(req.SourcePrefix) + formatCategoryLabel(category),
+		"<b>New</b> " + formatChannelTitle(req.SourcePrefix, req.Theme, req.TitleBold) + formatCategoryLabel(category),
 		"<b>Author:</b> " + html.EscapeString(fallback(req.AuthorName, "Unknown")),
 	}
 
@@ -178,7 +178,7 @@ func formatForwardCard(req model.ForwardRequest) string {
 
 func formatForwardMinimal(req model.ForwardRequest) string {
 	category := detectAnnouncementCategory(req.Text)
-	lines := []string{"<b>New</b> " + html.EscapeString(req.SourcePrefix) + formatCategoryLabel(category)}
+	lines := []string{"<b>New</b> " + formatChannelTitle(req.SourcePrefix, req.Theme, req.TitleBold) + formatCategoryLabel(category)}
 
 	metaParts := []string{}
 	if req.AuthorName != "" {
@@ -289,6 +289,40 @@ func highlightVersions(text string) string {
 	})
 }
 
+func formatChannelTitle(sourcePrefix, theme string, titleBold bool) string {
+	label := html.EscapeString(sourcePrefix)
+	if titleBold {
+		label = "<b>" + label + "</b>"
+	}
+
+	marker := themeMarker(theme)
+	if marker == "" {
+		return label
+	}
+	return marker + " " + label
+}
+
+func themeMarker(theme string) string {
+	switch strings.ToLower(strings.TrimSpace(theme)) {
+	case "green":
+		return "🟢"
+	case "blue":
+		return "🔵"
+	case "yellow":
+		return "🟡"
+	case "red":
+		return "🔴"
+	case "orange":
+		return "🟠"
+	case "purple":
+		return "🟣"
+	case "white", "gray", "grey":
+		return "⚪"
+	default:
+		return ""
+	}
+}
+
 func formatRichNonURLText(text string) string {
 	if strings.TrimSpace(text) == "" {
 		return html.EscapeString(text)
@@ -318,9 +352,12 @@ func formatRichNonURLText(text string) string {
 				return b.String()
 			}
 			code := text[i+1 : i+1+end]
-			b.WriteString("<code>")
+			if b.Len() > 0 && !strings.HasSuffix(b.String(), "\n") {
+				b.WriteString("\n")
+			}
+			b.WriteString("<pre><code>")
 			b.WriteString(html.EscapeString(code))
-			b.WriteString("</code>")
+			b.WriteString("</code></pre>")
 			i += end + 2
 		default:
 			next := nextSpecialIndex(text[i:])

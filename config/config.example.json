@@ -6,25 +6,33 @@
         "id": "1347161305919918140",
         "name": "mainnet-anns",
         "enabled": true,
-        "keywords": ["upgrade", "release", "patch"]
+        "keywords": ["upgrade", "release", "patch"],
+        "theme": "orange",
+        "titleBold": true
       },
       {
         "id": "1019493821777723443",
         "name": "testnet-anns",
         "enabled": true,
-        "keywords": ["testnet", "upgrade", "maintenance"]
+        "keywords": ["testnet", "upgrade", "maintenance"],
+        "theme": "yellow",
+        "titleBold": true
       },
       {
         "id": "969325968877568061",
         "name": "solana-mb",
         "enabled": true,
-        "keywords": ["solana", "validator", "release"]
+        "keywords": ["solana", "validator", "release"],
+        "theme": "blue",
+        "titleBold": true
       },
       {
         "id": "969324288152829962",
         "name": "solana-tds",
         "enabled": true,
-        "keywords": ["solana", "tds", "upgrade"]
+        "keywords": ["solana", "tds", "upgrade"],
+        "theme": "green",
+        "titleBold": true
       }
     ]
   },

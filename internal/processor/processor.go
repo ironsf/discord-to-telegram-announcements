@@ -53,6 +53,8 @@ func (p *Processor) HandleEvent(ctx context.Context, event *model.AnnouncementEv
 
 	res, err := p.telegram.PublishAnnouncement(ctx, p.cfg.Telegram.MainChatID, model.ForwardRequest{
 		SourcePrefix:   "[" + channel.Name + "]",
+		Theme:          channel.Theme,
+		TitleBold:      channel.TitleBold,
 		Text:           firstNonEmpty(event.ContentText, event.EmbedText),
 		Permalink:      event.Permalink,
 		AttachmentURLs: event.AttachmentURLs,
@@ -105,6 +107,8 @@ func (p *Processor) handleEdit(ctx context.Context, event *model.AnnouncementEve
 
 	res, err := p.telegram.PublishText(ctx, p.cfg.Telegram.MainChatID, telegram.FormatEditNotice(model.EditNoticeRequest{
 		SourcePrefix: "[" + channel.Name + "]",
+		Theme:        channel.Theme,
+		TitleBold:    channel.TitleBold,
 		ChannelName:  channel.Name,
 		Permalink:    event.Permalink,
 		Text:         firstNonEmpty(event.ContentText, event.EmbedText),

@@ -10,13 +10,15 @@ import (
 func TestFormatForwardMessageCardUsesClickableSourceAndReadableTime(t *testing.T) {
 	msg := FormatForwardMessage(model.ForwardRequest{
 		SourcePrefix: "[solana-tds]",
+		Theme:        "green",
+		TitleBold:    true,
 		AuthorName:   "Solana Tech",
 		TimestampISO: "2026-03-24T06:39:47.113Z",
 		Text:         "The v4.0.0-beta.4 release is now recommended.\nhttps://github.com/anza-xyz/agave/releases/tag/v4.0.0-beta.4",
 		Permalink:    "https://discord.com/channels/1/2/3",
 	}, "card")
 
-	if !strings.Contains(msg, `<b>New</b> [solana-tds]`) {
+	if !strings.Contains(msg, `<b>New</b> 🟢 <b>[solana-tds]</b>`) {
 		t.Fatalf("expected card header, got: %s", msg)
 	}
 	if !strings.Contains(msg, `<i>(Release)</i>`) {
@@ -42,6 +44,7 @@ func TestFormatForwardMessageCardUsesClickableSourceAndReadableTime(t *testing.T
 func TestFormatForwardMessageDetectsActivationCategory(t *testing.T) {
 	msg := FormatForwardMessage(model.ForwardRequest{
 		SourcePrefix: "[solana-mb]",
+		Theme:        "blue",
 		AuthorName:   "Solana Tech",
 		TimestampISO: "2026-03-23T11:54:45.499Z",
 		Text:         "We are going to activate the next feature at the epoch 946. The activation will raise the version floor.",
@@ -49,6 +52,9 @@ func TestFormatForwardMessageDetectsActivationCategory(t *testing.T) {
 
 	if !strings.Contains(msg, `<i>(Activation)</i>`) {
 		t.Fatalf("expected activation category in header, got: %s", msg)
+	}
+	if !strings.Contains(msg, `🔵 [solana-mb]`) {
+		t.Fatalf("expected themed title in header, got: %s", msg)
 	}
 }
 
@@ -78,6 +84,8 @@ func TestFormatForwardMessageMinimalIsCompact(t *testing.T) {
 func TestFormatEditNoticeUsesSummaryInsteadOfLegacyText(t *testing.T) {
 	msg := FormatEditNotice(model.EditNoticeRequest{
 		SourcePrefix: "[solana-mb]",
+		Theme:        "blue",
+		TitleBold:    true,
 		ChannelName:  "solana-mb",
 		Permalink:    "https://discord.com/channels/1/2/5",
 		TimestampISO: "2026-03-23T11:54:45.499Z",
@@ -87,7 +95,7 @@ func TestFormatEditNoticeUsesSummaryInsteadOfLegacyText(t *testing.T) {
 	if strings.Contains(msg, "announcement was edited") {
 		t.Fatalf("legacy edit text should not be present: %s", msg)
 	}
-	if !strings.Contains(msg, "<b>Updated</b> [solana-mb]") {
+	if !strings.Contains(msg, "<b>Updated</b> 🔵 <b>[solana-mb]</b>") {
 		t.Fatalf("expected updated header, got: %s", msg)
 	}
 	if !strings.Contains(msg, "activation details changed") {
@@ -107,8 +115,8 @@ func TestFormatInlineTextHighlightsBracketedAndCodeText(t *testing.T) {
 	if !strings.Contains(formatted, "<b>[solana-mb]</b>") {
 		t.Fatalf("expected bracketed text to be bold, got: %s", formatted)
 	}
-	if !strings.Contains(formatted, "<code>mainnet-v1.44.3</code>") {
-		t.Fatalf("expected inline backticks to render as code, got: %s", formatted)
+	if !strings.Contains(formatted, "<pre><code>mainnet-v1.44.3</code></pre>") {
+		t.Fatalf("expected single backticks to render as code block, got: %s", formatted)
 	}
 }
 
