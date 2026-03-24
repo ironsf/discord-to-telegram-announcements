@@ -263,7 +263,7 @@ func formatInlineText(text string) string {
 	trimmed := strings.TrimSpace(text)
 	matches := urlRegex.FindAllStringIndex(trimmed, -1)
 	if len(matches) == 0 {
-		return highlightVersions(html.EscapeString(trimmed))
+		return formatRichNonURLText(trimmed)
 	}
 
 	var b strings.Builder
@@ -271,14 +271,14 @@ func formatInlineText(text string) string {
 	for _, m := range matches {
 		start, end := m[0], m[1]
 		if start > cursor {
-			b.WriteString(highlightVersions(html.EscapeString(trimmed[cursor:start])))
+			b.WriteString(formatRichNonURLText(trimmed[cursor:start]))
 		}
 		url := trimmed[start:end]
 		b.WriteString(linkHTML(url, url))
 		cursor = end
 	}
 	if cursor < len(trimmed) {
-		b.WriteString(highlightVersions(html.EscapeString(trimmed[cursor:])))
+		b.WriteString(formatRichNonURLText(trimmed[cursor:]))
 	}
 	return b.String()
 }
@@ -287,6 +287,105 @@ func highlightVersions(text string) string {
 	return versionRegex.ReplaceAllStringFunc(text, func(match string) string {
 		return "<code>" + match + "</code>"
 	})
+}
+
+func formatRichNonURLText(text string) string {
+	if strings.TrimSpace(text) == "" {
+		return html.EscapeString(text)
+	}
+
+	var b strings.Builder
+	for i := 0; i < len(text); {
+		switch {
+		case strings.HasPrefix(text[i:], "```"):
+			end := strings.Index(text[i+3:], "```")
+			if end < 0 {
+				b.WriteString(formatPlainRichText(text[i:]))
+				return b.String()
+			}
+			code := strings.Trim(text[i+3:i+3+end], "\n")
+			if b.Len() > 0 && !strings.HasSuffix(b.String(), "\n") {
+				b.WriteString("\n")
+			}
+			b.WriteString("<pre><code>")
+			b.WriteString(html.EscapeString(code))
+			b.WriteString("</code></pre>")
+			i += 3 + end + 3
+		case text[i] == '`':
+			end := strings.IndexByte(text[i+1:], '`')
+			if end < 0 {
+				b.WriteString(formatPlainRichText(text[i:]))
+				return b.String()
+			}
+			code := text[i+1 : i+1+end]
+			b.WriteString("<code>")
+			b.WriteString(html.EscapeString(code))
+			b.WriteString("</code>")
+			i += end + 2
+		default:
+			next := nextSpecialIndex(text[i:])
+			if next < 0 {
+				b.WriteString(formatPlainRichText(text[i:]))
+				return b.String()
+			}
+			b.WriteString(formatPlainRichText(text[i : i+next]))
+			i += next
+		}
+	}
+
+	return b.String()
+}
+
+func formatPlainRichText(text string) string {
+	escaped := html.EscapeString(text)
+	escaped = highlightBracketedText(escaped)
+	return highlightVersions(escaped)
+}
+
+func highlightBracketedText(text string) string {
+	var b strings.Builder
+	for i := 0; i < len(text); {
+		if text[i] != '[' {
+			b.WriteByte(text[i])
+			i++
+			continue
+		}
+
+		end := strings.IndexByte(text[i+1:], ']')
+		if end < 0 {
+			b.WriteByte(text[i])
+			i++
+			continue
+		}
+
+		content := text[i : i+end+2]
+		b.WriteString("<b>")
+		b.WriteString(content)
+		b.WriteString("</b>")
+		i += end + 2
+	}
+	return b.String()
+}
+
+func nextSpecialIndex(text string) int {
+	indexes := []int{}
+	if idx := strings.Index(text, "```"); idx >= 0 {
+		indexes = append(indexes, idx)
+	}
+	if idx := strings.IndexByte(text, '`'); idx >= 0 {
+		indexes = append(indexes, idx)
+	}
+	if len(indexes) == 0 {
+		return -1
+	}
+
+	min := indexes[0]
+	for _, idx := range indexes[1:] {
+		if idx < min {
+			min = idx
+		}
+	}
+	return min
 }
 
 func detectAnnouncementCategory(text string) string {

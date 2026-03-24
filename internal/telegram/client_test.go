@@ -100,3 +100,22 @@ func TestFormatEditNoticeUsesSummaryInsteadOfLegacyText(t *testing.T) {
 		t.Fatalf("expected context block, got: %s", msg)
 	}
 }
+
+func TestFormatInlineTextHighlightsBracketedAndCodeText(t *testing.T) {
+	formatted := formatInlineText("[solana-mb] recommended version is `mainnet-v1.44.3`")
+
+	if !strings.Contains(formatted, "<b>[solana-mb]</b>") {
+		t.Fatalf("expected bracketed text to be bold, got: %s", formatted)
+	}
+	if !strings.Contains(formatted, "<code>mainnet-v1.44.3</code>") {
+		t.Fatalf("expected inline backticks to render as code, got: %s", formatted)
+	}
+}
+
+func TestFormatInlineTextRendersTripleBackticksAsCodeBlock(t *testing.T) {
+	formatted := formatInlineText("Run:\n```sudo apt update && sudo apt install --only-upgrade doublezero```")
+
+	if !strings.Contains(formatted, "<pre><code>sudo apt update &amp;&amp; sudo apt install --only-upgrade doublezero</code></pre>") {
+		t.Fatalf("expected fenced block to render as code block, got: %s", formatted)
+	}
+}
