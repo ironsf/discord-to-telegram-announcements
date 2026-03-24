@@ -1,6 +1,6 @@
 {
   "discord": {
-    "guildId": "STAKECRAFT_GUILD_ID",
+    "guildId": "CHANGE_ME_GUILD_ID",
     "allowedChannels": [
       {
         "id": "1347161305919918140",
@@ -29,8 +29,8 @@
     ]
   },
   "telegram": {
-    "mainChatId": "-5192206866",
-    "opsChatId": "-5192206866",
+    "mainChatId": "CHANGE_ME_MAIN_CHAT_ID",
+    "opsChatId": "CHANGE_ME_OPS_CHAT_ID",
     "messageFormat": "card"
   },
   "runtime": {
